@@ -1,21 +1,21 @@
 <?php
 require_once('./storage.php');
 
-$salt = 'pmffpm_rw2N_YuoUejt9FK0gG4_Y70h2X07zjyZ';
+function user_salt() { return 'pmffpm_rw2N_YuoUejt9FK0gG4_Y70h2X07zjyZ'; }
 
 function user_register($user, $password) {
   return user_set_password_hash($user, $password);
 }
 
 function user_is_correct_password($user, $candidate) {
-  return hash_password($user) == user_get_password($user);
+  return hash_password($candidate) == user_get_password($user);
 }
 
 function hash_password($x) {
   function sha($x) {
     return hash('sha256', $x);
   }
-  return sha(sha($x . $salt));
+  return sha(sha($x . user_salt()));
 }
 
 function user_set_password($user, $plain_password) {

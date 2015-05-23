@@ -7,6 +7,5 @@ function parseRoute($x) {
   return Array($xs[0], array_slice($xs, 1));
 }
 
-echo('<pre>');
 list($module, $args) = parseRoute($_SERVER);
 require_once($module);
