@@ -11,21 +11,36 @@ function user_register($user, $password) {
 }
 
 function user_make_session($user) {
-  return 'foobar';
+  $token = hash_password(openssl_random_pseudo_bytes(32));
+  storage_set('users',
+              user_match_user($user),
+              Array('session' => Array('token' => $token,
+                                       'time'  => time()))
+             );
+  return $token;
 }
 
 function user_wipe_old_sessions() {
-  return true;
+  $data   = storage_all();
+  $users0 = $data->users;
+  foreach ($users0 as $id => $user) {
+    if ($user->session && (time() - $user->session->time) > 60*60*24*14) {
+      $user->session = NULL;
+    }
+    $data->users[$id] = $user;
+  }
+  return storage_dump($data);
 }
 
 function user_is_correct_password($user, $candidate) {
   return hash_password($candidate) == user_get_password($user);
 }
 
+function sha($x) {
+  return hash('sha256', $x);
+}
+
 function hash_password($x) {
-  function sha($x) {
-    return hash('sha256', $x);
-  }
   return sha(sha($x . user_salt()));
 }
 
@@ -87,6 +102,7 @@ function user_match_user($x) {
 {
   function  ok($x) { echo json_encode(Array('result' => $x)); }
   function nok($x) { echo json_encode(Array('error'  => $x)); }
+  user_wipe_old_sessions();
   if (is_array($_POST) && $_POST['user'] && $_POST['password']) {
     $user     = $_POST['user'];
     $password = $_POST['password'];
@@ -98,7 +114,6 @@ function user_match_user($x) {
     }
     if ($args[0] == 'signin') {
       if (user_is_correct_password($user, $password)) {
-        user_wipe_old_sessions();
         $session = user_make_session($user);
         return ok($session);
       } else {

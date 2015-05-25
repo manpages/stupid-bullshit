@@ -9,7 +9,9 @@ function storage_put($namespace, $document, $opts = false) {
   if (!$opts) $opts = default_opts();
   $fname = $opts['target'];
   ensure($fname);
-  $data  = storage_data($fname);
+  $data  = (object)storage_data($fname);
+  if (!$data->$namespace)
+    $data->$namespace = [];
   array_push($data->$namespace, $document);
   storage_flush($data, $fname);
   return true;
@@ -26,7 +28,7 @@ function storage_set($namespace, $selector, $document, $opts = false) {
   if (!$opts) $opts = default_opts();
   $fname = $opts['target'];
   ensure($fname);
-  $data = storage_data($fname);
+  $data = (object)storage_data($fname);
   $nsdocument = $data->$namespace;
   $hits = storage_get($namespace, $selector, $opts);
   if (empty($hits))
@@ -40,8 +42,18 @@ function storage_set($namespace, $selector, $document, $opts = false) {
   }
 }
 
+function storage_all($opts = false) { //stupid API but fuck it
+  if (!$opts) $opts = default_opts();
+  return storage_data($opts['target']);
+}
+
 function storage_data($x) {
   return (json_decode(file_get_contents($x)));
+}
+
+function storage_dump($what, $opts = false) {
+  if (!$opts) $opts = default_opts();
+  return storage_flush($what, $opts['target']);
 }
 
 function storage_flush($what, $where) {
