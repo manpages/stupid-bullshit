@@ -31,5 +31,6 @@
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
+    "query-string": "^2.1.0"
   }
 }

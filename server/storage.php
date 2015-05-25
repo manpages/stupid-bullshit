@@ -12,6 +12,7 @@ function storage_put($namespace, $document, $opts = false) {
   $data  = storage_data($fname);
   array_push($data->$namespace, $document);
   storage_flush($data, $fname);
+  return true;
 }
 
 function storage_get($namespace, $selector, $opts = false) {
